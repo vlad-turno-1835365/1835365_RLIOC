@@ -1,0 +1,16 @@
+services:
+  mars-simulator:
+    image: mars-iot-simulator:multiarch_v1
+    ports:
+      - "8080:8080"
+    container_name: mars-simulator
+  
+  mars-tester:
+    build: .
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mars-simulator
+    container_name: mars-tester
+    environment:
+      - MARS_SIMULATOR_URL=http://mars-simulator:8080
