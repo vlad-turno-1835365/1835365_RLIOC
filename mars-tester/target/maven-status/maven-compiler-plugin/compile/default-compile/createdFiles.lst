@@ -1,0 +1,7 @@
+com\mars\tester\MarsTelemetryService.class
+com\mars\tester\MarsTester.class
+com\mars\tester\MarsTelemetryStreamService.class
+com\mars\tester\MarsApiController.class
+com\mars\tester\MarsScheduledTester.class
+com\mars\tester\MarsTesterApplication.class
+com\mars\tester\MarsApiTester.class
