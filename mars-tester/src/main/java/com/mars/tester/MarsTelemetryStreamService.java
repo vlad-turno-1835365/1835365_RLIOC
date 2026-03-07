@@ -6,10 +6,14 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.time.Duration;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.mars.tester.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +37,10 @@ public class MarsTelemetryStreamService {
 
     private final ExecutorService executor = Executors.newCachedThreadPool();
     private volatile boolean running = true;
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .disable(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
     @PostConstruct
     public void init() {
@@ -48,21 +56,21 @@ public class MarsTelemetryStreamService {
     }
 
     private void startTelemetryStreams() {
-        // Start all telemetry streams
-        connectToStreamAsync("/api/telemetry/stream/mars/telemetry/solar_array", "Solar Array");
-        connectToStreamAsync("/api/telemetry/stream/mars/telemetry/radiation", "Radiation");
-        connectToStreamAsync("/api/telemetry/stream/mars/telemetry/life_support", "Life Support");
-        connectToStreamAsync("/api/telemetry/stream/mars/telemetry/thermal_loop", "Thermal Loop");
-        connectToStreamAsync("/api/telemetry/stream/mars/telemetry/power_bus", "Power Bus");
-        connectToStreamAsync("/api/telemetry/stream/mars/telemetry/power_consumption", "Power Consumption");
-        connectToStreamAsync("/api/telemetry/stream/mars/telemetry/airlock", "Airlock");
+        // Start all telemetry streams with appropriate model mapping
+        connectToPowerStreamAsync("/api/telemetry/stream/mars/telemetry/solar_array", "Solar Array");
+        connectToPowerStreamAsync("/api/telemetry/stream/mars/telemetry/power_bus", "Power Bus");
+        connectToPowerStreamAsync("/api/telemetry/stream/mars/telemetry/power_consumption", "Power Consumption");
+        connectToEnvironmentStreamAsync("/api/telemetry/stream/mars/telemetry/radiation", "Radiation");
+        connectToEnvironmentStreamAsync("/api/telemetry/stream/mars/telemetry/life_support", "Life Support");
+        connectToThermalLoopStreamAsync("/api/telemetry/stream/mars/telemetry/thermal_loop", "Thermal Loop");
+        connectToAirlockStreamAsync("/api/telemetry/stream/mars/telemetry/airlock", "Airlock");
     }
 
-    private void connectToStreamAsync(String streamPath, String streamName) {
+    private void connectToPowerStreamAsync(String streamPath, String streamName) {
         CompletableFuture.runAsync(() -> {
             while (running) {
                 try {
-                    connectToStream(streamPath, streamName);
+                    connectToPowerStream(streamPath, streamName);
                     Thread.sleep(5000); // Wait 5 seconds before reconnecting
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -80,7 +88,73 @@ public class MarsTelemetryStreamService {
         }, executor);
     }
 
-    private void connectToStream(String streamPath, String streamName) {
+    private void connectToEnvironmentStreamAsync(String streamPath, String streamName) {
+        CompletableFuture.runAsync(() -> {
+            while (running) {
+                try {
+                    connectToEnvironmentStream(streamPath, streamName);
+                    Thread.sleep(5000); // Wait 5 seconds before reconnecting
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                } catch (Exception e) {
+                    logger.error("❌ Error in {} stream, reconnecting in 5s: {}", streamName, e.getMessage());
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+            }
+        }, executor);
+    }
+
+    private void connectToThermalLoopStreamAsync(String streamPath, String streamName) {
+        CompletableFuture.runAsync(() -> {
+            while (running) {
+                try {
+                    connectToThermalLoopStream(streamPath, streamName);
+                    Thread.sleep(5000); // Wait 5 seconds before reconnecting
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                } catch (Exception e) {
+                    logger.error("❌ Error in {} stream, reconnecting in 5s: {}", streamName, e.getMessage());
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+            }
+        }, executor);
+    }
+
+    private void connectToAirlockStreamAsync(String streamPath, String streamName) {
+        CompletableFuture.runAsync(() -> {
+            while (running) {
+                try {
+                    connectToAirlockStream(streamPath, streamName);
+                    Thread.sleep(5000); // Wait 5 seconds before reconnecting
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                } catch (Exception e) {
+                    logger.error("❌ Error in {} stream, reconnecting in 5s: {}", streamName, e.getMessage());
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+            }
+        }, executor);
+    }
+
+    private void connectToPowerStream(String streamPath, String streamName) {
         HttpURLConnection connection = null;
         BufferedReader reader = null;
         
@@ -104,10 +178,182 @@ public class MarsTelemetryStreamService {
                 while (running && (line = reader.readLine()) != null) {
                     if (line.startsWith("data: ") && line.length() > 6) {
                         String jsonData = line.substring(6);
-                        logger.info("📊 [{}] #{}: {}", streamName, ++messageCount, jsonData);
+                        try {
+                            TopicPowerV1 powerData = objectMapper.readValue(jsonData, TopicPowerV1.class);
+                            logger.info("⚡ [{}] #{}: {} - {} kW", streamName, ++messageCount, 
+                                powerData.getSubsystem(), powerData.getPower_kw());
+                        } catch (Exception e) {
+                            logger.warn("⚠️  Failed to parse {} data: {}", streamName, e.getMessage());
+                            logger.debug("Raw data: {}", jsonData);
+                        }
                     } else if (line.startsWith("event: ")) {
                         String eventType = line.substring(7);
-                        logger.info("📡 [{}] Event: {}", streamName, eventType);
+                        logger.debug("📡 [{}] Event: {}", streamName, eventType);
+                    } else if (line.contains("heartbeat") || line.contains("ping")) {
+                        logger.debug("💓 [{}] Heartbeat", streamName);
+                    }
+                }
+            } else {
+                logger.warn("⚠️  Failed to connect to {} - HTTP {}", streamName, connection.getResponseCode());
+            }
+            
+        } catch (Exception e) {
+            logger.error("❌ {} stream error: {}", streamName, e.getMessage());
+        } finally {
+            if (reader != null) {
+                try { reader.close(); } catch (Exception e) { /* ignore */ }
+            }
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+
+    private void connectToEnvironmentStream(String streamPath, String streamName) {
+        HttpURLConnection connection = null;
+        BufferedReader reader = null;
+        
+        try {
+            URL url = new URI(simulatorUrl + streamPath).toURL();
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Accept", "text/event-stream");
+            connection.setRequestProperty("Cache-Control", "no-cache");
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(30000);
+            connection.connect();
+
+            if (connection.getResponseCode() == 200) {
+                logger.info("✅ Connected to {} telemetry stream", streamName);
+                
+                reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String line;
+                int messageCount = 0;
+                
+                while (running && (line = reader.readLine()) != null) {
+                    if (line.startsWith("data: ") && line.length() > 6) {
+                        String jsonData = line.substring(6);
+                        try {
+                            TopicEnvironmentV1 envData = objectMapper.readValue(jsonData, TopicEnvironmentV1.class);
+                            logger.info("🌍 [{}] #{}: {} - {}", streamName, ++messageCount, 
+                                envData.getSource().getSystem(), envData.getStatus());
+                        } catch (Exception e) {
+                            logger.warn("⚠️  Failed to parse {} data: {}", streamName, e.getMessage());
+                            logger.debug("Raw data: {}", jsonData);
+                        }
+                    } else if (line.startsWith("event: ")) {
+                        String eventType = line.substring(7);
+                        logger.debug("📡 [{}] Event: {}", streamName, eventType);
+                    } else if (line.contains("heartbeat") || line.contains("ping")) {
+                        logger.debug("💓 [{}] Heartbeat", streamName);
+                    }
+                }
+            } else {
+                logger.warn("⚠️  Failed to connect to {} - HTTP {}", streamName, connection.getResponseCode());
+            }
+            
+        } catch (Exception e) {
+            logger.error("❌ {} stream error: {}", streamName, e.getMessage());
+        } finally {
+            if (reader != null) {
+                try { reader.close(); } catch (Exception e) { /* ignore */ }
+            }
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+
+    private void connectToThermalLoopStream(String streamPath, String streamName) {
+        HttpURLConnection connection = null;
+        BufferedReader reader = null;
+        
+        try {
+            URL url = new URI(simulatorUrl + streamPath).toURL();
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Accept", "text/event-stream");
+            connection.setRequestProperty("Cache-Control", "no-cache");
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(30000);
+            connection.connect();
+
+            if (connection.getResponseCode() == 200) {
+                logger.info("✅ Connected to {} telemetry stream", streamName);
+                
+                reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String line;
+                int messageCount = 0;
+                
+                while (running && (line = reader.readLine()) != null) {
+                    if (line.startsWith("data: ") && line.length() > 6) {
+                        String jsonData = line.substring(6);
+                        try {
+                            TopicThermalLoopV1 thermalData = objectMapper.readValue(jsonData, TopicThermalLoopV1.class);
+                            logger.info("🌡️  [{}] #{}: {} - {}°C", streamName, ++messageCount, 
+                                thermalData.getLoop(), thermalData.getTemperature_c());
+                        } catch (Exception e) {
+                            logger.warn("⚠️  Failed to parse {} data: {}", streamName, e.getMessage());
+                            logger.debug("Raw data: {}", jsonData);
+                        }
+                    } else if (line.startsWith("event: ")) {
+                        String eventType = line.substring(7);
+                        logger.debug("📡 [{}] Event: {}", streamName, eventType);
+                    } else if (line.contains("heartbeat") || line.contains("ping")) {
+                        logger.debug("💓 [{}] Heartbeat", streamName);
+                    }
+                }
+            } else {
+                logger.warn("⚠️  Failed to connect to {} - HTTP {}", streamName, connection.getResponseCode());
+            }
+            
+        } catch (Exception e) {
+            logger.error("❌ {} stream error: {}", streamName, e.getMessage());
+        } finally {
+            if (reader != null) {
+                try { reader.close(); } catch (Exception e) { /* ignore */ }
+            }
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+
+    private void connectToAirlockStream(String streamPath, String streamName) {
+        HttpURLConnection connection = null;
+        BufferedReader reader = null;
+        
+        try {
+            URL url = new URI(simulatorUrl + streamPath).toURL();
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Accept", "text/event-stream");
+            connection.setRequestProperty("Cache-Control", "no-cache");
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(30000);
+            connection.connect();
+
+            if (connection.getResponseCode() == 200) {
+                logger.info("✅ Connected to {} telemetry stream", streamName);
+                
+                reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String line;
+                int messageCount = 0;
+                
+                while (running && (line = reader.readLine()) != null) {
+                    if (line.startsWith("data: ") && line.length() > 6) {
+                        String jsonData = line.substring(6);
+                        try {
+                            TopicAirlockV1 airlockData = objectMapper.readValue(jsonData, TopicAirlockV1.class);
+                            logger.info("🚪 [{}] #{}: {} - {}", streamName, ++messageCount, 
+                                airlockData.getAirlock_id(), airlockData.getLast_state());
+                        } catch (Exception e) {
+                            logger.warn("⚠️  Failed to parse {} data: {}", streamName, e.getMessage());
+                            logger.debug("Raw data: {}", jsonData);
+                        }
+                    } else if (line.startsWith("event: ")) {
+                        String eventType = line.substring(7);
+                        logger.debug("📡 [{}] Event: {}", streamName, eventType);
                     } else if (line.contains("heartbeat") || line.contains("ping")) {
                         logger.debug("💓 [{}] Heartbeat", streamName);
                     }
