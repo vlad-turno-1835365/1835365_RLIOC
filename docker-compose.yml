@@ -5,12 +5,12 @@ services:
       - "8080:8080"
     container_name: mars-simulator
   
-  mars-tester:
-    build: .
+  mars-ingestion-service:
+    build: ./source/mars-ingestion-service
     ports:
       - "8081:8081"
     depends_on:
       - mars-simulator
-    container_name: mars-tester
+    container_name: mars-ingestion-service
     environment:
       - MARS_SIMULATOR_URL=http://mars-simulator:8080

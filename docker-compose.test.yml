@@ -1,6 +1,6 @@
 services:
   mars-test-runner:
-    build: .
+    build: ./source/mars-ingestion-service
     container_name: mars-test-runner
     environment:
       - MARS_SIMULATOR_URL=http://host.docker.internal:8080
