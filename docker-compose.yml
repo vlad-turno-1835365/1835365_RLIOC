@@ -49,12 +49,39 @@ services:
       - MARS_SIMULATOR_URL=http://mars-simulator:8080
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
 
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    container_name: redis
+    
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: marsuser
+      POSTGRES_PASSWORD: marspassword
+      POSTGRES_DB: marsdb
+    ports:
+      - "5432:5432"
+    container_name: postgres
+
   mars-consumer:
     build: ./source/mars_consumer
+    ports:
+      - "8000:8000"
     depends_on:
       - kafka
+      - redis
+      - postgres
     container_name: mars-consumer
     environment:
       - KAFKA_BROKER=kafka:29092
       - KAFKA_TOPIC=mars-telemetry-events
       - KAFKA_GROUP_ID=mars_consumer_group
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=marsuser
+      - DB_PASSWORD=marspassword
+      - DB_NAME=marsdb
