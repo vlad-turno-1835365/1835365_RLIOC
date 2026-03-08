@@ -13,7 +13,7 @@ COPY consumer.py .
 
 # Imposta le variabili d'ambiente di default (verranno sovrascritte dal docker-compose dei tuoi compagni)
 ENV KAFKA_BROKER="kafka:9092"
-ENV KAFKA_TOPIC="mars_telemetry"
+ENV KAFKA_TOPIC="mars-telemetry-events"
 
 # Comando per avviare il microservizio
 CMD ["python", "consumer.py"]

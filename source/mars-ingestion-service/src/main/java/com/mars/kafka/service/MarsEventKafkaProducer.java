@@ -62,17 +62,16 @@ public class MarsEventKafkaProducer {
             logger.info("📤 Publishing event to Kafka topic '{}': sensor={}, value={}, timestamp={}", 
                 marsEventsTopic, event.getSensor_name(), event.getValue(), event.getTimestamp());
 
-            // Use CompletableFuture.runAsync to handle the async operation
-            return CompletableFuture.runAsync(() -> {
-                try {
-                    kafkaTemplate.send(marsEventsTopic, key, eventJson).get();
-                    logger.info("✅ Successfully published event to Kafka topic '{}'", marsEventsTopic);
-                } catch (Exception e) {
-                    logger.error("❌ Failed to publish event to Kafka: topic={}, sensor={}, error={}", 
-                        marsEventsTopic, event.getSensor_name(), e.getMessage(), e);
-                    throw new RuntimeException(e);
-                }
-            });
+            // Simple blocking send without timeout
+            try {
+                kafkaTemplate.send(marsEventsTopic, key, eventJson);
+                logger.info("✅ Successfully published event to Kafka topic '{}'", marsEventsTopic);
+                return CompletableFuture.completedFuture(null);
+            } catch (Exception e) {
+                logger.error("❌ Failed to publish event to Kafka: topic={}, sensor={}, error={}", 
+                    marsEventsTopic, event.getSensor_name(), e.getMessage(), e);
+                return CompletableFuture.failedFuture(e);
+            }
 
         } catch (JsonProcessingException e) {
             logger.error("❌ Failed to serialize event to JSON: sensor={}, error={}", 

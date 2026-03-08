@@ -48,3 +48,13 @@ services:
     environment:
       - MARS_SIMULATOR_URL=http://mars-simulator:8080
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+
+  mars-consumer:
+    build: ./source/mars_consumer
+    depends_on:
+      - kafka
+    container_name: mars-consumer
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - KAFKA_TOPIC=mars-telemetry-events
+      - KAFKA_GROUP_ID=mars_consumer_group

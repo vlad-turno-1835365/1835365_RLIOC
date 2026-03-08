@@ -41,8 +41,8 @@ def process_event(payload):
         print(f"[-] Errore di validazione: manca il campo {e} nel payload.")
 
 def main():
-    kafka_broker = os.getenv('KAFKA_BROKER', 'localhost:9092')
-    kafka_topic = os.getenv('KAFKA_TOPIC', 'mars_telemetry')
+    kafka_broker = os.getenv('KAFKA_BROKER', 'kafka:9092')
+    kafka_topic = os.getenv('KAFKA_TOPIC', 'mars-telemetry-events')
     group_id = os.getenv('KAFKA_GROUP_ID', 'mars_consumer_group')
 
     conf = {

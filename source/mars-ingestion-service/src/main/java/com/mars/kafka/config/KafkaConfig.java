@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
@@ -18,6 +19,7 @@ import java.util.Map;
  * Kafka configuration for Mars IoT event producer
  */
 @Configuration
+@EnableKafka
 public class KafkaConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(KafkaConfig.class);
@@ -71,9 +73,9 @@ public class KafkaConfig {
         // Compression for better performance (disabled for Docker compatibility)
         // configProps.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy");
         
-        // Timeout configurations
-        configProps.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 30000);
-        configProps.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, 120000);
+        // Timeout configurations (reduced for faster failure detection)
+        configProps.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 5000);
+        configProps.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, 10000);
         
         return new DefaultKafkaProducerFactory<>(configProps);
     }
