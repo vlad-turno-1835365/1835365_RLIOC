@@ -64,6 +64,8 @@ services:
     ports:
       - "5432:5432"
     container_name: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   mars-consumer:
     build: ./source/mars_consumer
@@ -85,3 +87,6 @@ services:
       - DB_USER=marsuser
       - DB_PASSWORD=marspassword
       - DB_NAME=marsdb
+      
+volumes:
+  postgres_data:
