@@ -4,7 +4,7 @@ services:
     ports:
       - "8080:8080"
     container_name: mars-simulator
-  
+
   kafka:
     image: confluentinc/cp-kafka:7.4.0
     ports:
@@ -54,7 +54,7 @@ services:
     ports:
       - "6379:6379"
     container_name: redis
-    
+
   postgres:
     image: postgres:15-alpine
     environment:
@@ -117,6 +117,17 @@ services:
       - DB_MANAGER_URL=http://mars_db_manager:8000
       - MEMORY_CACHE_URL=http://mars_memory_cache:8000
       - API_GATEWAY_URL=http://mars_api_gateway:8000
-      
+
+  mars-frontend:
+    build: ./source/frontend
+    ports:
+      - "5173:5173"
+    container_name: mars-frontend
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    volumes:
+      - ./source/frontend/src:/app/src
+      - ./source/frontend/public:/app/public
+
 volumes:
   postgres_data:
