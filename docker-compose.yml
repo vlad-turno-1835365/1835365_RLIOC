@@ -85,3 +85,14 @@ services:
       - DB_USER=marsuser
       - DB_PASSWORD=marspassword
       - DB_NAME=marsdb
+
+  mars-frontend:
+    build: ./source/frontend
+    ports:
+      - "5173:5173"
+    container_name: mars-frontend
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    volumes:
+      - ./source/frontend/src:/app/src
+      - ./source/frontend/public:/app/public
