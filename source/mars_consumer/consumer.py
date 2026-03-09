@@ -56,25 +56,27 @@ def init_db():
         time.sleep(2)
         
     if not conn:
-        print("[!] Impossibile connettersi al DB per l'inizializzazione.")
+        print("[!] Impossibile connettersi al DB.")
         return
     
     try:
         cur = conn.cursor()
+        # Schema database: IF <sensor_name> <operator> <value> THEN set <actuator_name> to <actuator_action>
         cur.execute("""
-            CREATE TABLE IF NOT EXISTS rules (
+            CREATE TABLE IF NOT EXISTS automation_rules (
                 id SERIAL PRIMARY KEY,
-                sensor_name VARCHAR(50) UNIQUE NOT NULL,
-                min_threshold FLOAT,
-                max_threshold FLOAT
+                sensor_name VARCHAR(100) NOT NULL,
+                operator VARCHAR(2) NOT NULL,
+                threshold_value FLOAT NOT NULL,
+                actuator_name VARCHAR(100) NOT NULL,
+                actuator_action VARCHAR(3) NOT NULL
             )
         """)
         
-        cur.execute("SELECT COUNT(*) FROM rules")
+        cur.execute("SELECT COUNT(*) FROM automation_rules")
         if cur.fetchone()[0] == 0:
-            # Seed base rules
-            cur.execute("INSERT INTO rules (sensor_name, min_threshold, max_threshold) VALUES ('temperature', -100, 50)")
-            cur.execute("INSERT INTO rules (sensor_name, min_threshold, max_threshold) VALUES ('pressure', 0, 2000)")
+            # Esempio insert di una regola un po' a caso
+            cur.execute("INSERT INTO automation_rules (sensor_name, operator, threshold_value, actuator_name, actuator_action) VALUES ('temperature', '>', 35.0, 'cooling_fan', 'ON')")
             print("[*] Regole base inserite nel database.")
             
         conn.commit()
@@ -84,78 +86,67 @@ def init_db():
     finally:
         conn.close()
 
-def get_rule_for_sensor(sensor_name):
+def evaluate_rules(sensor_name, value):
     conn = get_db_connection()
     if not conn:
-        return None
+        return []
     
+    triggered_actions = []
     try:
         cur = conn.cursor()
-        cur.execute("SELECT min_threshold, max_threshold FROM rules WHERE sensor_name = %s", (sensor_name,))
-        row = cur.fetchone()
+        cur.execute("SELECT operator, threshold_value, actuator_name, actuator_action FROM automation_rules WHERE sensor_name = %s", (sensor_name,))
+        rules = cur.fetchall()
         cur.close()
         
-        if row:
-            return {'min_threshold': row[0], 'max_threshold': row[1]}
+        num_val = float(value)
+        
+        # Valuta le regole presenti per <sensor_name>
+        for rule in rules:
+            operator, threshold, actuator_name, actuator_action = rule
+            condition_met = False
+            
+            if operator == '<' and num_val < threshold: condition_met = True
+            elif operator == '<=' and num_val <= threshold: condition_met = True
+            elif operator == '=' and num_val == threshold: condition_met = True
+            elif operator == '>' and num_val > threshold: condition_met = True
+            elif operator == '>=' and num_val >= threshold: condition_met = True
+            
+            if condition_met:
+                triggered_actions.append({"actuator": actuator_name, "action": actuator_action})
+                print(f"[!] AUTOMAZIONE: {sensor_name} {operator} {threshold} -> Imposto {actuator_name} a {actuator_action}")
+                
     except Exception as e:
-        print(f"[!] Errore lettura regole: {e}")
+        print(f"[!] Errore durante la lettura/attuazione delle regole: {e}")
     finally:
         conn.close()
-    return None
-
-def apply_rule(sensor_name, value):
-    rule = get_rule_for_sensor(sensor_name)
-    if not rule:
-        return "OK" # Nessuna regola, quindi OK
-    
-    min_t = rule.get('min_threshold')
-    max_t = rule.get('max_threshold')
-    
-    try:
-        num_val = float(value)
-        if min_t is not None and num_val < min_t:
-            return "WARNING_LOW"
-        if max_t is not None and num_val > max_t:
-            return "WARNING_HIGH"
-    except (ValueError, TypeError):
-        pass
-    
-    return "OK"
+        
+    return triggered_actions
 
 def process_event(payload):
-    """
-    Estrazione, validazione, applicazione regole e cache.
-    """
     try:
-        event_id = payload['event_id']
-        timestamp = payload['timestamp']
+        event_id = payload.get('event_id')
+        timestamp = payload.get('timestamp')
         sensor_name = payload['sensor_name']
         value = payload['value']
-        
         unit = payload.get('unit', 'N/A')
         
-        # 1. Applica Regole
-        status = apply_rule(sensor_name, value)
-        payload['status'] = status
+        actions = evaluate_rules(sensor_name, value) # Deriva le eventuali azioni da eseguire
+        payload['triggered_actions'] = actions # Aggiungile al payload per la dashboard
         
-        print(f"\n[+] Nuovo Evento: {sensor_name} = {value} {unit} [{timestamp}] - Regola applicata: {status}")
+        print(f"\n[+] Nuovo Evento: {sensor_name} = {value} {unit} [{timestamp}]")
 
-        # 2. Salva in Cache
         if redis_client:
             try:
-                redis_client.set(f"sensor_latest:{sensor_name}", json.dumps(payload))
+                redis_client.set(f"sensor_latest:{sensor_name}", json.dumps(payload)) # Salva in cache
             except Exception as e:
                 print(f"[-] Errore salvataggio su Redis: {e}")
 
-        # 3. Inoltro API (se necessario)
         try:
-            response = requests.post(DASHBOARD_API_URL, json=payload, timeout=2.0)
-            if response.status_code == 200:
-                print("    -> Inviato con successo alla Dashboard API.")
-            else:
+            response = requests.post(DASHBOARD_API_URL, json=payload, timeout=2.0) # Inoltra il payload alla dashboard
+            if response.status_code != 200:
                 print(f"    -> [!] Errore API: ricevo status {response.status_code}")
-        except requests.exceptions.RequestException as e:
-            print(f"    -> [!] Impossibile contattare la Dashboard API ({DASHBOARD_API_URL}).")
+        except requests.exceptions.RequestException:
+            print(f"    -> [!] Impossibile contattare la Dashboard API.")
 
     except KeyError as e:
         print(f"[-] Errore di validazione: manca il campo {e} nel payload.")
@@ -230,16 +221,21 @@ def get_all_rules():
         
     try:
         cur = conn.cursor()
-        cur.execute("SELECT sensor_name, min_threshold, max_threshold FROM rules")
+        cur.execute("SELECT id, sensor_name, operator, threshold_value, actuator_name, actuator_action FROM automation_rules")
         rows = cur.fetchall()
-        rules = [{"sensor_name": r[0], "min_threshold": r[1], "max_threshold": r[2]} for r in rows]
+        rules = [
+            {
+                "id": r[0], 
+                "sensor_name": r[1], 
+                "operator": r[2], 
+                "threshold": r[3],
+                "actuator": r[4],
+                "action": r[5]
+            } for r in rows
+        ]
         cur.close()
         return rules
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         conn.close()
-
-if __name__ == '__main__':
-    # Puoi avviare il file direttamente o tramite uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)

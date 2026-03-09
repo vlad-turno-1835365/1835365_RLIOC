@@ -64,6 +64,8 @@ services:
     ports:
       - "5432:5432"
     container_name: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   mars-consumer:
     build: ./source/mars_consumer
@@ -96,3 +98,6 @@ services:
     volumes:
       - ./source/frontend/src:/app/src
       - ./source/frontend/public:/app/public
+      
+volumes:
+  postgres_data:
