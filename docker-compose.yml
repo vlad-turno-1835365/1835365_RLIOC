@@ -67,26 +67,56 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  mars-consumer:
-    build: ./source/mars_consumer
+  mars_db_manager:
+    build: ./source/mars_db_manager
     ports:
-      - "8000:8000"
+      - "8002:8000"
     depends_on:
-      - kafka
-      - redis
       - postgres
-    container_name: mars-consumer
+    container_name: mars_db_manager
     environment:
-      - KAFKA_BROKER=kafka:29092
-      - KAFKA_TOPIC=mars-telemetry-events
-      - KAFKA_GROUP_ID=mars_consumer_group
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=marsuser
       - DB_PASSWORD=marspassword
       - DB_NAME=marsdb
+
+  mars_memory_cache:
+    build: ./source/mars_memory_cache
+    ports:
+      - "8003:8000"
+    depends_on:
+      - redis
+    container_name: mars_memory_cache
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+  mars_api_gateway:
+    build: ./source/mars_api_gateway
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mars_memory_cache
+    container_name: mars_api_gateway
+    environment:
+      - MEMORY_CACHE_URL=http://mars_memory_cache:8000
+
+  mars_message_consumer:
+    build: ./source/mars_message_consumer
+    depends_on:
+      - kafka
+      - mars_db_manager
+      - mars_memory_cache
+      - mars_api_gateway
+    container_name: mars_message_consumer
+    environment:
+      - KAFKA_BROKER=kafka:29092
+      - KAFKA_TOPIC=mars-telemetry-events
+      - KAFKA_GROUP_ID=mars_consumer_group
+      - DB_MANAGER_URL=http://mars_db_manager:8000
+      - MEMORY_CACHE_URL=http://mars_memory_cache:8000
+      - API_GATEWAY_URL=http://mars_api_gateway:8000
       
 volumes:
   postgres_data:
