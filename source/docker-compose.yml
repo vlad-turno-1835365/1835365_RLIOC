@@ -38,7 +38,7 @@ services:
     container_name: zookeeper
 
   mars-ingestion-service:
-    build: ./source/mars-ingestion-service
+    build: ./mars-ingestion-service
     ports:
       - "8081:8081"
     depends_on:
@@ -68,7 +68,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   mars_db_manager:
-    build: ./source/mars_db_manager
+    build: ./mars_db_manager
     ports:
       - "8002:8000"
     depends_on:
@@ -82,7 +82,7 @@ services:
       - DB_NAME=marsdb
 
   mars_memory_cache:
-    build: ./source/mars_memory_cache
+    build: ./mars_memory_cache
     ports:
       - "8003:8000"
     depends_on:
@@ -93,7 +93,7 @@ services:
       - REDIS_PORT=6379
 
   mars_api_gateway:
-    build: ./source/mars_api_gateway
+    build: ./mars_api_gateway
     ports:
       - "8000:8000"
     depends_on:
@@ -103,7 +103,7 @@ services:
       - MEMORY_CACHE_URL=http://mars_memory_cache:8000
 
   mars_message_consumer:
-    build: ./source/mars_message_consumer
+    build: ./mars_message_consumer
     depends_on:
       - kafka
       - mars_db_manager
@@ -119,15 +119,15 @@ services:
       - API_GATEWAY_URL=http://mars_api_gateway:8000
 
   mars-frontend:
-    build: ./source/frontend
+    build: ./frontend
     ports:
       - "5173:5173"
     container_name: mars-frontend
     environment:
       - VITE_API_URL=http://localhost:8000
     volumes:
-      - ./source/frontend/src:/app/src
-      - ./source/frontend/public:/app/public
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
 
 volumes:
   postgres_data:
