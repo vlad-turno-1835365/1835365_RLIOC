@@ -1,6 +1,12 @@
 # SYSTEM DESCRIPTION:
 
-Very far from home, SpaceY had the brilliant idea to "accidentally" ship one of its employees to Mars etc etc etc... the system description is the same as the input.md file! 
+Very far from home, SpaceY had the brilliant idea to "accidentally" ship one of its employees to Mars etc etc etc... the system description is the same as the input.md file. 
+The application is a distributed event driven microservices platform, containerized via Docker and having components as:
+- a **'data ingestion service'** to fetch and normalize data from sensors, made in Java with Maven
+- a **'message consumer'** to evaluate the data against the rules stored, made in Python
+- a **'db manager'** to interact with a persistent database used to store rules, made in Python
+- an **'api gateway'** to be the middleware connecting all the services, made in Python
+- a **'dashboard'** to be the frontend for the user, made in React/Js with Vite
 
 # USER STORIES:
 
