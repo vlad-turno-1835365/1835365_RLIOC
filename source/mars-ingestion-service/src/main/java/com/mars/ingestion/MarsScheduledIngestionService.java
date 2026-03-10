@@ -44,7 +44,7 @@ public class MarsScheduledIngestionService {
     /**
      * Scheduled method that runs every 30 seconds to ingest Mars IoT sensor data
      */
-    @Scheduled(fixedRate = 30000) // Run every 30 seconds
+    @Scheduled(fixedRate = 5000) // Run every 5 seconds
     public void performScheduledIngestion() {
         ingestionCount++;
         log.info("\n🚀 Mars IoT Ingestion Run #{} - {}", ingestionCount, java.time.LocalTime.now());
