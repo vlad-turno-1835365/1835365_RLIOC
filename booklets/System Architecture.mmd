@@ -1,0 +1,23 @@
+graph TD
+    %% Interfaccia Utente
+    Operator([Operator]) -->|Interacts| Frontend(mars-frontend)
+    Frontend -->|HTTP/REST| Gateway(mars_api_gateway)
+
+    %% Gateway e Gestione Dati
+    Gateway -->|Routing| DBManager(mars_db_manager)
+    Gateway -->|Routing| MemCache(mars_memory_cache)
+    
+    %% Storage Persistente e Volatile
+    DBManager -->|Create/Delete Rules| Postgres[(postgres)]
+    MemCache -->|Real Time Status| Redis[(redis)]
+
+    %% Flusso Ingestione Dati
+    Simulator(mars-simulator) -->|Raw Sensor Data| Ingestion(mars-ingestion-service)
+    Ingestion -->|Event Normalization| Kafka{kafka}
+    Zookeeper(zookeeper) -.-|Coordinates| Kafka
+
+    %% Engine di Automazione (Core)
+    Kafka -->|Consume Events| Consumer(mars_message_consumer)
+    Consumer -->|Rule Check| DBManager
+    Consumer -->|Update Status| MemCache
+    Consumer -->|Trigger Actuators| Gateway
