@@ -1,501 +1,291 @@
 # SYSTEM DESCRIPTION:
 
-Not Far(m) From Home is a platform that allows a direct interaction between local farmers and consumers, with the main purpose of being “km 0”.
-The Farmers will be able to post their fresh produce in the site, and the consumers to reserve the produce and select a day for the pickup at the Agricoltural Company.
+Very far from home, SpaceY had the brilliant idea to "accidentally" ship one of its employees to Mars etc etc etc... the system description is the same as the input.md file! 
 
 # USER STORIES:
 
-1) As a Client , I want to Register in the site so that I can use the site
-2) As a Client , I want to login in the site so that I can use the site
-3) As a Client , I want to not put my Credentials in the site every time a reload the site, so that I can use the site
-4) As a Client , I want to logout, so that no one else use my account
-5) As a Client , I want to see my personal information
-6) As a Client , I want to See Hot products, so that i can discover the product in the season
-7) As a Client , I want to See Agricultural companies in my area, so that i can choose where to buy products
-8) As a Client , I want to See products for each Agricultural company, so that I can buy From them
-9) As a Client , I want to Add products to my cart, so that i can buy them
-10) As a Client, I want to Remove products from my cart, so that i can decide what to buy
-11) As a Client , I want to see the products in my cart, so that i can see want I am going to buy
-12) As a Client , I want to Complete an order, so that I can choose a date to go and pick up the products
-13) As a Client , I want to Open in google Maps the Location of the Agricultural company, so that i can find directions to it easly
-14) As an Agricultural Company, I want to Add products in inventory, so that I can show my clients the new produce
-15) As an Agricultural Company, I want to Remove products in inventory, so that My clients don't try to buy an item that I don't have anymore
-16) As an Agricultural Company, I want to Modify products in inventory, so that I can change price and quantities on an item
-17) As an Agricultural Company, I want to Registrer in the site, so that i can be visible and start doing business in the site
-18) As an Agricultural Company, I want to Login, so that i can work on the site
-19) As an Agricultural Company, I want to not put my Credentials in the site every time a reload the site, so that I can use the site easily
-20) As an Agricultural Company, I want to logout from the site
-21) As an Agricultural Company, I want to see my personal information
-22) As the Administrator of the site, I want to login in the site
-23) As the Administrator of the site, I want to not put my Credentials in the site every time a reload the site
-24) As the Administrator of the site, I want to logout from the site
-25) As the Administrator of the site, I want to delete malevolus user
-26) As the Administrator of the site, I want to see all orders, so that I can better analyze how the platform is doing
-27) As the Administrator of the site, I want to see all users, so that I can better analyze how the platform is doing
-28) As the Administrator of the site, I want to get user details, so that I can have some clear view over the user
-29) As the Administrator of the site, I want to modify users, so that I can do site maintenance
-30) As the Administrator of the site, I want to see all areas, so that I can do site maintenance
-31) As the Administrator of the site, I want to get all Agricultural company by areas, so that I can analyze how they are distributed
-32) As the Administrator of the site, I want to get all Agricultural company details, so that I can do platform maintenance
-33) As the Administrator of the site, I want to get product by seller, so that I can do site maintenance
-34) As the Administrator of the site, I want to get product by id, so that I can do site maintenance
-35) As the Administrator of the site, I want to add an area, so that if there is some request for that area to be added, I can
-36) As the Administrator of the site, I want to add product, so that I can do site maintenance
-37) As the Administrator of the site, I want to modify product, so that I can do site maintenance
-38) As the Administrator of the site, I want to delete product, so that I can do site maintenance
-39) As the Administrator of the site, I want to delete an area, so that I can do site maintenance
-40) As a client, i want to see all my orders
-41) As a farmer, i want to see all my orders
-
-
+Same as system description, check the input.md file for a complete list of the user stories.
 
 # CONTAINERS:
 
-## CONTAINER_NAME: Authentication
+## CONTAINER_NAME: mars-frontend
 
-### DESCRIPTION: 
-Manages all functionalities related to registration, login, session persistence, and logout for clients, agricultural companies, and the site administrator.
+### DESCRIPTION (Short): 
+Manages the user interface
 
 ### USER STORIES:
-1) As a Client , I want to Register in the site so that I can use the site
-
-2) As a Client , I want to login in the site so that I can use the site
-
-3) As a Client , I want to not put my Credentials in the site every time a reload the site, so that I can use the site
-
-17) As an Agricultural Company, I want to Registrer in the site, so that i can be visible and start doing business in the site
-
-18) As an Agricultural Company, I want to Login
-
-19) As an Agricultural Company, I want to not put my Credentials in the site every time a reload the site, so that I can use the site easily
-
-4) As a Client , I want to logout, so that no one else use my account
-
-20) As an Agricultural Company, I want to logout from the site
-
-22) As the Administrator of the site, I want to login in the site
-    
-23) As the Administrator of the site, I want to not put my Credentials in the site every time a reload the site
-    
-24) As the Administrator of the site, I want to logout from the site
-
-
+07) As an Operator, I want to define a new rule by comparing...
+11) As an operator, I want to view the list of existing rules
+12) As an operator, I want to delete a rule among the existing ones
+13) As an Operator, I want the interface to use different visualizations...
+14) As an Operator, I want to see the current state the actuators on the dashboard
+15) As an Operator, I want to manually trigger an actuator even if...
+16) As an Operator, I want an interface to compose rules by selecting...
+17) As an Operator, I want to view a sensor's data as a chart that...
+18) As an Operator, I want the dashboard to receive sensor data in real-time...
 
 ### PORTS: 
-9701:9701
+5173:5173
 
-### DESCRIPTION:
-The Authentication container is responsible for managing all the security-related functionalities that involve registration, login, session persistence clients and agricultural companies. 
+### DESCRIPTION (Long):
+The mars-frontend container manages the front-end user interactions related to the habitat monitoring and automation. This includes displaying real-time data, managing the rules and providing manual toggles for actuators.
 
-### PERSISTANCE EVALUATION
-The Authentication container does not require data persistence to manage token creation and validation.
+### PERSISTENCE EVALUATION:
+It does not include a database, state is entirely stored in the browser memory.
 
-### EXTERNAL SERVICES CONNECTIONS
-The Authentication container does not connect to external services.
+### EXTERNAL SERVICES CONNECTIONS:
+It connects to the APIGateway to fetch data and send commands.
 
 ### MICROSERVICES:
 
-#### MICROSERVICE: auth
-- TYPE: backend
-- DESCRIPTION: Manages the creation and verification of tokens.
-- PORTS: 9701
+#### MICROSERVICE: mars-frontend
+- TYPE: frontend
+- DESCRIPTION: This microservice serves the main user interface for the Operator.
+- PORTS: 5173
 - TECHNOLOGICAL SPECIFICATION:
-The microservice is developed in Python and uses Flask, a lightweight Python web framework.
-It uses the followinf libraries and technologies:
-    - Gunicorn: The microservice uses Gunicorn as a WSGI server to serve the Flask application in a production environment.
-    - JWT (pyjwt): The microservice handles JSON Web Tokens (JWT), commonly used for secure token-based authentication.
-    - Cryptography: The cryptography==41.0.4 and cffi==1.16.0 packages are used for secure encryption and cryptographic operations.
-    - Requests: The library requests==2.31.0 is used for making HTTP requests
-- SERVICE ARCHITECTURE: 
-The service uses a single file to manage login and signup, with functions to create and evaluate JWT tokens.
+Utilizes JavaScript/JSX and is built using the React framework.
+Key components:
+    - Vite: Used as build tool and development server.
+    - React Hooks: Used for state management and side-effects handling.
+- SERVICE ARCHITECTURE:
+Single Page Application that uses components to divide the dashboard into modular widgets.
+- PAGES/COMPONENTS:
 
-- ENDPOINTS:
-		
-	| HTTP METHOD | URL | Description | User Stories |
-	| ----------- | --- | ----------- | ------------ |
-    | POST | /{role}/login | Verifies encrypted password and creates and sends out a JWT token | 2, 18, 22 |
-    | POST | /{role}/signup | Creates encrypted password and creates and sends out a JWT token | 1, 17 |
-    | POST | /{role}/logout | Deletes the token | 4, 20, 24 |
-
-    | POST | /verifyToken | Verifies the validity of a JWT token | 3, 19, 23 |
+    | Name    | Description                                  | Microservice     | User Stories                      |
+    | ------- | -------------------------------------------- | ---------------- | --------------------------------- |
+    | App.jsx | Dashboard display and API Gateway connection | mars_api_gateway | 7, 11, 12, 13, 14, 15, 16, 17, 18 |
 
 
-## CONTAINER_NAME: Client-BE
+## CONTAINER_NAME: mars-ingestion-service
 
-### DESCRIPTION: 
-Handles operations related to user and company profiles, viewing personal information, and storing profile related data.
+### DESCRIPTION (Short): 
+Handles data collection, normalization and publishing to the message broker.
 
 ### USER STORIES:
-5) As a Client , I want to see my personal information
-
-27) As the Administrator of the site, I want to see all users, so that I can better analyze how the platform is doing
-
-28) As the Administrator of the site, I want to get user details, so that I can have some clear view over the user
-
-25) As the Administrator of the site, I want to delete malevolus user
-
-1) As a Client , I want to Register in the site so that I can use the site
-
-2) As a Client , I want to login in the site so that I can use the site
-
+01) As an Operator, I want the system to periodically poll...
+02) As an Operator, I want the system to subscribe to the telemetry streams
+03) As an Operator, I want the ingestion service to handle network disconnections
+04) As an Operator, I want heterogeneous data from various sensors to be normalized
+05) As an Operator, I want normalized events to be ingested by a message broker
 
 ### PORTS:
-9702:9702
+8081:8081
 
-### DESCRIPTION:
-The Client-BE container handles operations related to the management of user and company profiles on the "Not Far(m) From Home" platform. Its main responsibilities include displaying personal information for clients and the site administrator. This container serves as a central point for storing and managing profile-related data.
+### DESCRIPTION (Long):
+The mars-ingestion-service container is responsible for pulling and receiving all raw data generated by the hardware simulators. 
+It converts specific sensor dialect into a single normalized event format and pushes standardized payloads to Kafka.
 
-### PERSISTANCE EVALUATION
-The Client-BE container requires persistent storage to maintain details about the users and company profiles. It needs to store user-specific information, such as personal data and any associated preferences or settings attributed to that user. This data includes profile contact details like email, username and password.
+### PERSISTENCE EVALUATION:
+No persistent storage required since it's stateless.
 
-### EXTERNAL SERVICES CONNECTIONS
-The Client-BE container does not connect to external services.
+### EXTERNAL SERVICES CONNECTIONS:
+Connected to the `mars-simulator` (HTTP/WS) to get data, and to `kafka` to publish it.
 
 ### MICROSERVICES:
 
-#### MICROSERVICE: CLIENT-BE
+#### MICROSERVICE: mars-ingestion-service
 - TYPE: backend
-- DESCRIPTION: Handles the creation, viewing, and updating of personal information for clients. It also enables administrators to view and retrieve detailed user profiles to analyze platform activity and manage user data.
-- PORTS: 9702
+- DESCRIPTION: Collects, normalizes, and publishes telemetry data.
+- PORTS: 8081
 - TECHNOLOGICAL SPECIFICATION:
-The microservice utilizes the Java programming language, specifically targeting Java 17. The service is built using the Spring Boot framework, version 2.7.4.
+Made in Java. Java rules. Write once, run everywhere.
 Key components of the stack:
-Spring Boot:
-Several Spring Boot starter dependencies are included:
-spring-boot-starter-data-jpa: the service interacts with a relational database using JPA (Java Persistence API).
-spring-boot-starter-web: This is used for building web applications, including RESTful APIs.
-spring-boot-starter-test: This is included for unit and integration testing purposes.
-MySQL:
-The dependency mysql-connector-java indicates that the microservice is configured to connect to a MySQL database.
-Maven:
-The build process is managed by Apache Maven, with plugins such as spring-boot-maven-plugin for packaging the application and maven-compiler-plugin for compiling the code with Java 17.
+    - Kafka Client: Interacts with the Kafka broker.
+    - Maven: Compiles classes and builds the app.
 - SERVICE ARCHITECTURE:
 The service is realized with:
-    - a controller to manage routes, request parameters and responses. It handles the business logic of the microservice.
-    - model directory with all the classes related to requests'bodies and responses.
-    - repositories and services to interact with the database and make queries.
-    - an entity class to respresent the database table.
-
+    - Polling and streaming tasks to interface with external APIs.
+    - A normalization model containing the `NormalizedEvent` class.
+    - A Kafka producer service to send serialized JSON strings to the `mars-telemetry-events` topic.
 - ENDPOINTS:
-
-    | HTTP METHOD | URL | Description | User Stories |
-	| ----------- | --- | ----------- | ------------ |
-    | POST | /client | Inserts a new client in the database and interacts with the auth container | 1 |
-    | GET | /clients | Returns all the clients in the database | 27 |
-    | GET | /client/{id} | Returns the client informations | 5, 28 |
-    | DELETE | /client/{id} | Deletes the client | 25 |
-    | POST | /client/login | Manages the client login and interacts with the auth container | 1 |
-
-- DB STRUCTURE: 
-
-	**_Client_** :	| **_id_** | name | email | password |
+  None for the user interface
 
 
-#### MICROSERVICE: mysql-client
-- TYPE: database
-- DESCRIPTION: Manages persistent storage of user data.
-- PORTS: 3306
+## CONTAINER_NAME: mars_db_manager
 
-
-## CONTAINER_NAME: Farmer-BE
-
-### DESCRIPTION: 
-Manages operations regarding products, including adding, modifying, and removing products. This service caters to agricultural companies and the administrator.
+### DESCRIPTION (Short): 
+Manages operations regarding automation rules.
 
 ### USER STORIES:
-
-6) As a Client , I want to See Hot products, so that i can discover the product in the season
-7) As a Client , I want to See Agricultural company in my area, so that i can choose where to buy products
-8) As a Client , I want to See The products for each Agricultural company, so that I can buy From them
-14) As an Agricultural Company, I want to Add products in inventory, so that I can show my clients the new produce
-15) As an Agricultural Company, I want to Remove products in inventory, so that My clients don't try to buy an item that I don't have anymore
-16) As an Agricultural Company, I want to Modify products in inventory, so that I can change price and quantities on the same item
-17) As an Agricultural Company, I want to Registrer in the site, so that i can be visible and start doing business in the site
-18) As an Agricultural Company, I want to Login, so that i can work on the site
-30) As the Administrator of the site, I want to see all areas, so that I can do site maintenance
-31) As the Administrator of the site, I want to get all Agricultural company by areas, so that I can analyze how they are distributed
-32) As the Administrator of the site, I want to get all Agricultural company details, so that I can do platform maintenance
-33) As the Administrator of the site, I want to get product by seller, so that I can do site maintenance
-34) As the Administrator of the site, I want to get product by id, so that I can do site maintenance
-35) As the Administrator of the site, I want to add an area, so that if there is some request for that area to be added, I can
-36) As the Administrator of the site, I want to add product, so that I can do site maintenance
-37) As the Administrator of the site, I want to modify product, so that I can do site maintenance
-38) As the Administrator of the site, I want to delete product, so that I can do site maintenance
-39) As the Administrator of the site, I want to delete an area, so that I can do site maintenance
-21) As an Agricultural Company, I want to see my personal information
-
-
+08) As an Operator, I want the rules I create to be persisted in a database
 
 ### PORTS: 
-9703:9703
+8002:8000
 
 ### DESCRIPTION:
-The  container is designed to manage all operations related to products on the "Not Far(m) From Home" platform. Its primary responsibilities include adding new products to the inventory, modifying details of existing products, and removing products that are no longer available. 
-The container also provides essential capabilities for the site administrator that include adding, modifying, or deleting products, as well as retrieving product details either by seller or by product ID. 
-It also shows products to clients and manages Agricultural companies profile data.
+The mars_db_manager container is designed to abstract CRUD operations over the rules database.
+It also offers a specific endpoint to evaluate a sensor value against all stored rules to determine if an actuator needs to be triggered.
 
-### PERSISTANCE EVALUATION
-The Product_Management container requires persistent storage to manage the product information effectively. This container maintains a database of products that includes details like product name, quantity, price, agricultural company ID, and product descriptions. It also manages agricultural companies informations and areas-related informations.
+### PERSISTENCE EVALUATION
+The mars_db_manager container requires persistent storage to maintain the rules and it uses an external Postgres DB.
 
 ### EXTERNAL SERVICES CONNECTIONS
-The Farmer-BE container does not connect to external services.
-
+The mars_db_manager container is connected to the `postgres` container.
 
 ### MICROSERVICES:
 
-#### MICROSERVICE: farmer-be
+#### MICROSERVICE: mars_db_manager
 - TYPE: backend
-- DESCRIPTION: Manages all backend functionalities such as adding, modifying, and removing products from the inventory, manges agricultural companies datas and areas. 
-- PORTS: 9703
+- DESCRIPTION: Manages CRUD operations and evaluation for the rules db.
+- PORTS: 8002
 - TECHNOLOGICAL SPECIFICATION:
-The microservice utilizes the Java programming language, specifically targeting Java 17. The service is built using the Spring Boot framework, version 2.7.4.
+Developed in Python. What a shame.
 Key components of the stack:
-Spring Boot:
-Several Spring Boot starter dependencies are included:
-spring-boot-starter-data-jpa: the service interacts with a relational database using JPA (Java Persistence API).
-spring-boot-starter-web: This is used for building web applications, including RESTful APIs.
-spring-boot-starter-test: This is included for unit and integration testing purposes.
-MySQL:
-The dependency mysql-connector-java indicates that the microservice is configured to connect to a MySQL database.
-Maven:
-The build process is managed by Apache Maven, with plugins such as spring-boot-maven-plugin for packaging the application and maven-compiler-plugin for compiling the code with Java 17.
+    - FastAPI/Flask: web framework to expose REST APIs.
+    - Psycopg2/SQLAlchemy: needed to interact with the database.
 - SERVICE ARCHITECTURE:
-The service is realized with:
-    - a controller to manage areas endpoint, one to mange products and one to manage farmers
-    - model directory with all the classes related to requests'bodies and responses.
-    - repositories and services to interact with the database and make queries.
-    - Three Entity classes, one for each table of the Database.
+The service handles rule definitions, interacts with the DB and formulates responses based on the `automation_rules` table.
 
 - ENDPOINTS:
 
-    | HTTP METHOD | URL | Description | User Stories |
-	| ----------- | --- | ----------- | ------------ |
-    | POST | /farmer | Inserts a new farmer in the database and interacts with the auth container | 17 |
-    | GET | /farmers | Returns all the clients in the database | 27 |
-    | GET | /farmer/{id} | Returns the farmer informations | 8, 21 |
-    | DELETE | /farmer/{id} | Deletes the farmer | 25 |
-    | POST | /farmer/login | Manages the client login and interacts with the auth container | 18 |
-    | GET | /farmer/areas | Returns the farmers divided by Area | 31, 7, 32 |
-    | POST | /area | Inserts a new area | 35 |
-    | GET | /area | Returns all the areas | 30 |
-    | DELETE | /area/{id} | Deletes the area | 39 |
-    | POST | /product/add | Inserts a new product | 14, 36 |
-    | DELETE | /product/{id} | Deletes the area | 15, 38 |
-    | GET | /product/findBySeller | Returns all the products of an agricultural company | 33, 8 |
-    | POST | /product/modify/{id} | Modifies a product | 16, 37 |
-    | GET | /product/{id} | Returns the product with the specified id | 34, 6 |
+    | HTTP METHOD | URL             | Description                           | User Stories |
+    | ----------- | --------------- | ------------------------------------- | ------------ |
+    | POST        | /api/rules      | Inserts a new rule                    | 07, 08, 16   |
+    | GET         | /api/rules      | Returns all rules                     | 11           |
+    | DELETE      | /api/rules/{id} | Deletes a rule                        | 12           |
+    | POST        | /api/evaluate   | Evaluates sensor values against rules | 09           |
 
 - DB STRUCTURE: 
 
-	**_Product_** :	| **_id_** | title | seller | image | description | price | weight | availability |
-    **_Farmer_** :	| **_id_** | username | email | password | image | area | address |
-    **_Farmer_** :	| **_id_** | name |
+    **_Rule_** :    | **_id_** | sensor_name | operator | threshold_value | actuator_name | target_state |
 
-#### MICROSERVICE: mysql-farmer
+#### MICROSERVICE: postgres
 - TYPE: database
-- DESCRIPTION: Stores all relevant data concerning the products, agricultural companies and areas.
-- PORTS: 3306
-
-## CONTAINER_NAME: Order-BE
-
-### DESCRIPTION: 
-Manages order placements, including completing orders and arranging pickup dates, as well as viewing all orders for site administration.
-
-### USER_STORIES:
-12) As a Client , I want to Complete an order, so that I can choose a date to go and pick up the products
-26) As the Administrator of the site, I want to see all orders, so that I can better analyze how the platform is doing
-
-### PORTS: 
-9704:9704
-
-### DESCRIPTION:
-The Order-BE container is dedicated to managing all aspects of order processing within the "Not Far(m) From Home" platform. This includes facilitating the completion of orders by clients—allowing them to select dates for product pickup directly from local farmers. Additionally, it provides capabilities for the site administrator to view all processed orders, offering insights and oversight to ensure smooth operation and fulfillment. 
-
-### PERSISTANCE EVALUATION
-The Order-BE container requires persistent storage to maintain and manage the details of each order. This includes storing information such as the order IDs, consumer details, products ordered, quantities, prices, and the selected pickup dates. 
-
-### EXTERNAL SERVICES CONNECTIONS
-The Order-BE container does not connect to external services.
+- DESCRIPTION: It's a database, come on.
+- PORTS: 5432
 
 
-### MICROSERVICES:
+## CONTAINER_NAME: mars_memory_cache
 
-#### MICROSERVICE: order_be
-- TYPE: backend
-- DESCRIPTION: This microservice is responsible for handling the logic and operations related to order placement by clients. It allows clients to complete orders, select pickup dates, and ensures all necessary details are preserved for each transaction. It also communicates with the Product_Management container to check product availability. Provides to the site's administrator the capability to view and manage all orders.
-- PORTS: 9704
-- TECHNOLOGICAL SPECIFICATION:
-The microservice utilizes the Java programming language, specifically targeting Java 17. The service is built using the Spring Boot framework, version 2.7.4.
-Key components of the stack:
-Spring Boot:
-Several Spring Boot starter dependencies are included:
-spring-boot-starter-data-jpa: the service interacts with a relational database using JPA (Java Persistence API).
-spring-boot-starter-web: This is used for building web applications, including RESTful APIs.
-spring-boot-starter-test: This is included for unit and integration testing purposes.
-MySQL:
-The dependency mysql-connector-java indicates that the microservice is configured to connect to a MySQL database.
-Maven:
-The build process is managed by Apache Maven, with plugins such as spring-boot-maven-plugin for packaging the application and maven-compiler-plugin for compiling the code with Java 17.
-- SERVICE ARCHITECTURE:
-The service is realized with:
-    - a controller to manage routes, request parameters and responses. It handles the business logic of the microservice.
-    - model directory with all the classes related to requests'bodies and responses.
-    - repositories and services to interact with the database and make queries.
-    - an entity class to respresent the database table.
-
-- ENDPOINTS:
-
-    | HTTP METHOD | URL | Description | User Stories |
-	| ----------- | --- | ----------- | ------------ |
-    | POST | /order | Inserts a new order | 12 |
-    | GET | /order/<client>/myorder | Returns all the client's orders | 26, 40 |
-    | GET | /order/<farmer>/myorder | Returns all the farmer's orders | 26, 41 |
-
-
-- DB STRUCTURE: 
-
-	**_Order_** :	| **_id_** | client | commission | pickup | accepted |
-
-#### MICROSERVICE: mysql-order
-- TYPE: database
-- DESCRIPTION: Manages the persistent storage and retrieval of order data, including order IDs, consumer details, products ordered, quantities, prices, and pickup dates. 
-- PORTS: 3306
-
-
-## CONTAINER_NAME: Client-FE
+### DESCRIPTION (Short): 
+Handles the caching of the latest known stateof the sensors.
 
 ### USER STORIES:
-13) As a Client , I want to Open in google Maps the Location of the Agricultural company, so that i can find directions to it easly
-8) As a Client , I want to Add to cart the products, so that i can buy them
-9) As a Client, I want to Remove products to the cart, so that i can decide what to buy
-10) As a Client , I want to see product in the cart, so that i can see want I am going to buy
-11) As a Client , I want to see the products in my cart, so that i can see want I am going to buy
-
+06) As an Operator, I want the system to cache the latest known state of each sensor
 
 ### PORTS: 
-4201:4201
+8003:8000
 
-### DESCRIPTION:
-The Client-FE container is primarily responsible for managing the front-end user interactions related to product showcasing and purchase on the Not Far(m) From Home platform. This includes displaying products from various agricultural companies and seasonal or hot products, managing the shopping cart functionalities like adding and removing products, and providing a comprehensive view of products in the shopping cart. Designed to enhance user experience, it ensures clients can easily navigate through different product offerings, make informed purchase decisions, and handle their transactions efficiently within the platform.
+### DESCRIPTION (Long):
+This container manages in-memory data storage and it's updated every time a new event is processed. It serves as source for the dashboard when the Operator requests the current state of the habitat without waiting for new telemetry.
 
-### PERSISTANCE EVALEVALUATION
-The Client-FE container does not include a database.
+### PERSISTENCE EVALUATION
+Volatile storage via Redis.
 
-### EXTERNAL SERVICES SERVICES CONNECTIONS
-The Client-FE container connects to Google Maps API to show the Agricultural companies locations.
+### EXTERNAL SERVICES CONNECTIONS
+Connection to the `redis` container.
 
 ### MICROSERVICES:
 
-#### MICROSERVICE: client-fe
-- TYPE: frontend
-- DESCRIPTION: This microservice serves the main user interface for the Customer.
-- PORTS: 4201
-- - PAGES:
-
-	| Name | Description | Related Microservice | User Stories |
-	| ---- | ----------- | -------------------- | ------------ |
-	| Home.js | Displays and manages yhe client SPA | client-be, farmer-be | 8, 9, 10, 11, 13 |
-
-
-## CONTAINER_NAME: Admin-FE
-
-### DESCRIPTION: 
-Provides administrative control features including user and product modification, and deletion of malicious users.
-
-### USER-STORIES:
-
-### PORTS: 
-4203:4203
-
-### DESCRIPTION:
-The Admin-FE container serves a frontend for admin user stories.
-
-### PERSISTANCE EVALIGATION
-The Admin-FE container does not include a database.
-
-### EXTERNAL SERVICES CONNECTIONS
-The Admin-FE container does not connect to external services.
-
-### MICROSERVICES:
-
-#### MICROSERVICE: admin-fe
-- TYPE: frontend
-- DESCRIPTION: This microservice serves the main user interface for the Administrator.
-- PORTS: 4203
-
-
-## CONTAINER_NAME: Farmer-FE
-
-### DESCRIPTION: 
-Provides the User Interface for the Agricutural companies.
-
-### USER-STORIES:
-
-### PORTS: 
-4202:4202
-
-### DESCRIPTION:
-The Farmer-FE container serves a frontend for Agricultural Companies User stories.
-
-### PERSISTANCE EVALUATION
-The Farmer-FE container does not include a database.
-
-### EXTERNAL SERVICES CONNECTIONS
-The Farmer-FE container does not connect to external services.
-
-### MICROSERVICES:
-
-#### MICROSERVICE: admin-fe
-- TYPE: frontend
-- DESCRIPTION: This microservice serves the main user interface for the Agricultural companies.
-- PORTS: 4202
-
-
-## CONTAINER_NAME: Image-Server
-
-### DESCRIPTION: 
-Provides storing and retrieval of images for all the users of the site.
-
-### USER-STORIES:
-
-### PORTS: 
-9705:9705
-
-### DESCRIPTION:
-The Image-Server container Provides storing and retrieval of images for all the users of the site.
-
-### PERSISTANCE EVALIGATION
-The Image-Server container does not include a database, stores images directly in the VM memory.
-
-### EXTERNAL SERVICES CONNECTIONS
-The Farmer-FE container does not connect to external services.
-
-#### MICROSERVICE: image-server
+#### MICROSERVICE: mars_memory_cache
 - TYPE: backend
-- DESCRIPTION: This microservice Provides storing and retrieval of images for all the users of the site.
-- PORTS: 9703
+- DESCRIPTION: R/W real-time states into Redis.
+- PORTS: 8003
+- TECHNOLOGICAL SPECIFICATION:
+Developed in Python, uses the `redis-py` client library to interact with the db
+- ENDPOINTS:
 
-## CONTAINER_NAME: APIGateway
+    | HTTP METHOD | URL        | Description                           | User Stories |
+    | ----------- | ---------- | ------------------------------------- | ------------ |
+    | GET         | /api/state | Retrieves the cached state of sensors | 06           |
+
+#### MICROSERVICE: redis
+- TYPE: database
+- DESCRIPTION: Come on, it's a database (again).
+- PORTS: 6379
+
+
+## CONTAINER_NAME: mars_message_consumer
 
 ### DESCRIPTION: 
-Provides a single Point of Access for all the incoming requests
+Subscribes to the Kafka topic, consumes/evaluates normalized events and triggers actions.
 
-### USER-STORIES:
+### USER STORIES:
+09) As an Operator, I want the automation system to dynamically evaluate rules...
+10) As an Operator, I want the automation rules engine to automatically trigger an actuator...
 
 ### PORTS: 
-8080:8080
+None
 
-### DESCRIPTION:
-Provides a single Point of Access for all the incoming requests
+### DESCRIPTION (Long):
+The mars_message_consumer is the core rule engine. It constantly listens to Kafka for new data, queries the database manager to see if any threshold is crossed and dynamically executes POST requests to trigger actuators.
 
-### PERSISTANCE EVALUATION
-The APIGateway container does not include a database.
+### PERSISTENCE EVALUATION
+Actually none.
 
 ### EXTERNAL SERVICES CONNECTIONS
-The APIGateway container does not connect to external services.
+`kafka`, `mars_db_manager`, `mars_memory_cache`, `mars_api_gateway`.
 
-#### MICROSERVICE: api-getaway
+### MICROSERVICES:
+
+#### MICROSERVICE: mars_message_consumer
+- TYPE: backend
+- DESCRIPTION: Used for stream processing and rule evaluation.
+- PORTS: N/A
+- TECHNOLOGICAL SPECIFICATION:
+Developed in Python and uses `confluent_kafka` to consume messages and `requests` to forward evaluations to other microservices.
+- SERVICE ARCHITECTURE:
+A single script `mars_message_consumer.py` containing the polling loop and the `process_event` logic.
+
+
+## CONTAINER_NAME: mars_api_gateway
+
+### DESCRIPTION (Short): 
+Access point for all the frontend requests.
+
+### USER STORIES:
+Actually none.
+
+### PORTS: 
+8000:8000
+
+### DESCRIPTION (Long):
+Single Access point for incoming requests from the dashboard. It routes traffic to the proper internal microservices.
+
+### PERSISTENCE EVALUATION
+None
+
+### EXTERNAL SERVICES CONNECTIONS
+`mars_memory_cache` and `mars_db_manager`.
+
+### MICROSERVICES:
+
+#### MICROSERVICE: mars_api_gateway
 - TYPE: middleware
-- DESCRIPTION: This microservice Provides storing and retrieval of images for all the users of the site.
-- PORTS: 9703
-- DESCRIPTION: Is the only available endpoint of the system, redirects the requests to the correct container
+- DESCRIPTION: Is the only available endpoint of the backend, it redirects the requests to the correct the internal container.
+- PORTS: 8000
+
+
+## CONTAINER_NAME: kafka & zookeeper
+
+### DESCRIPTION: 
+Message broker infrastructure for event-driven communication.
+
+### PORTS: 
+9092:9092, 2181:2181
+
+### DESCRIPTION:
+The Kafka container handles the queueing and distribution of telemetry data streams between the ingestion producer and the consumer engine. Zookeeper manages the broker state.
+
+### PERSISTENCE EVALUATION
+Can persist messages on disk according to retention policies.
+
+### EXTERNAL SERVICES CONNECTIONS
+Connected to Zookeeper, but it's not an external connection.
+
+### INTERNAL SERVICES CONNECTIONS
+Connected to Zookeeper.
+
+### MICROSERVICES:
+
+#### MICROSERVICE: kafka
+- TYPE: middleware / broker
+- DESCRIPTION: Handles the `mars-telemetry-events` topic.
+- PORTS: 9092
+
+#### MICROSERVICE: zookeeper
+- TYPE: middleware / registry
+- DESCRIPTION: Manages Kafka broker coordination.
+- PORTS: 2181
+
+eof
