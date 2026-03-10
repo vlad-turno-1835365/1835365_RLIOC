@@ -98,9 +98,11 @@ services:
       - "8000:8000"
     depends_on:
       - mars_memory_cache
+      - mars_db_manager
     container_name: mars_api_gateway
     environment:
       - MEMORY_CACHE_URL=http://mars_memory_cache:8000
+      - DB_MANAGER_URL=http://mars_db_manager:8000
 
   mars_message_consumer:
     build: ./mars_message_consumer

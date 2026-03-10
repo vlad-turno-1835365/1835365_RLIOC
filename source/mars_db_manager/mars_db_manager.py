@@ -55,7 +55,7 @@ def init_db():
         
         cur.execute("SELECT COUNT(*) FROM automation_rules")
         if cur.fetchone()[0] == 0:
-            cur.execute("INSERT INTO automation_rules (sensor_name, operator, threshold_value, actuator_name, actuator_action) VALUES ('temperature', '>', 35.0, 'cooling_fan', 'ON')")
+            cur.execute("INSERT INTO automation_rules (sensor_name, operator, threshold_value, actuator_name, actuator_action) VALUES ('greenhouse_temperature', '>', 35.0, 'cooling_fan', 'ON')")
             print("[*] Regole base inserite nel database.")
             
         conn.commit()
@@ -72,6 +72,14 @@ def startup_event():
 class EvaluateRequest(BaseModel):
     sensor_name: str
     value: float
+
+# Modello Pydantic per ricevere la regola dal frontend
+class RuleCreate(BaseModel):
+    sensor: str
+    operator: str
+    value: float
+    actuator: str
+    state: str
 
 @app.post("/api/evaluate")
 def evaluate_rules(request: EvaluateRequest):
@@ -120,19 +128,66 @@ def get_all_rules():
         cur = conn.cursor()
         cur.execute("SELECT id, sensor_name, operator, threshold_value, actuator_name, actuator_action FROM automation_rules")
         rows = cur.fetchall()
+        # RISOLTO: Ora restituiamo i nomi delle variabili che il frontend si aspetta!
         rules = [
             {
                 "id": r[0], 
-                "sensor_name": r[1], 
+                "sensor": r[1], 
                 "operator": r[2], 
-                "threshold": r[3],
+                "value": r[3],
                 "actuator": r[4],
-                "action": r[5]
+                "state": r[5]
             } for r in rows
         ]
         cur.close()
         return rules
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+# NUOVO: Endpoint per creare una nuova regola
+@app.post("/api/rules")
+def create_rule(rule: RuleCreate):
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="Database not available")
+        
+    try:
+        cur = conn.cursor()
+        # Mappiamo i nomi del frontend (sensor, value, state) sulle colonne del DB
+        cur.execute("""
+            INSERT INTO automation_rules (sensor_name, operator, threshold_value, actuator_name, actuator_action) 
+            VALUES (%s, %s, %s, %s, %s) RETURNING id
+        """, (rule.sensor, rule.operator, rule.value, rule.actuator, rule.state))
+        
+        new_id = cur.fetchone()[0]
+        conn.commit()
+        cur.close()
+        
+        # Restituiamo la regola appena creata comprensiva di ID
+        return {**rule.dict(), "id": new_id}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+# NUOVO: Endpoint per eliminare una regola
+@app.delete("/api/rules/{rule_id}")
+def delete_rule(rule_id: int):
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="Database not available")
+        
+    try:
+        cur = conn.cursor()
+        cur.execute("DELETE FROM automation_rules WHERE id = %s", (rule_id,))
+        conn.commit()
+        cur.close()
+        return {"status": "success", "message": f"Rule {rule_id} deleted"}
+    except Exception as e:
+        conn.rollback()
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         conn.close()

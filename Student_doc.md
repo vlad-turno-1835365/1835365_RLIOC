@@ -246,7 +246,7 @@ Single Access point for incoming requests from the dashboard. It routes traffic 
 None
 
 ### EXTERNAL SERVICES CONNECTIONS
-`mars_memory_cache` and `mars_db_manager`.
+`mars_memory_cache`, `mars_db_manager` and `mars-simulator`.
 
 ### MICROSERVICES:
 

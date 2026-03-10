@@ -1,12 +1,23 @@
 import os
 import requests
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, Any
 import uvicorn
 
 app = FastAPI(title="Mars API Gateway")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], 
+    allow_credentials=True,
+    allow_methods=["*"],  
+    allow_headers=["*"],  
+)
+
 MEMORY_CACHE_URL = os.getenv('MEMORY_CACHE_URL', 'http://mars_memory_cache:8000')
+DB_MANAGER_URL = os.getenv('DB_MANAGER_URL', 'http://mars_db_manager:8000')
+SIMULATOR_URL = os.getenv('SIMULATOR_URL', 'http://mars-simulator:8080')
 
 class ConnectionManager:
     def __init__(self):
@@ -68,3 +79,40 @@ async def websocket_endpoint(websocket: WebSocket):
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+@app.get("/api/rules")
+def get_rules():
+    try:
+        response = requests.get(f"{DB_MANAGER_URL}/api/rules", timeout=2.0)
+        return response.json()
+    except Exception as e:
+        return []
+
+@app.post("/api/rules")
+def create_rule(rule: dict):
+    try:
+        response = requests.post(f"{DB_MANAGER_URL}/api/rules", json=rule, timeout=2.0)
+        return response.json()
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+@app.delete("/api/rules/{rule_id}")
+def delete_rule(rule_id: int):
+    try:
+        response = requests.delete(f"{DB_MANAGER_URL}/api/rules/{rule_id}", timeout=2.0)
+        return response.json()
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+@app.post("/api/actuators/{actuator_name}")
+def toggle_actuator(actuator_name: str, payload: dict):
+    try:
+        # Inoltra il comando direttamente all'API REST del simulatore
+        response = requests.post(
+            f"{SIMULATOR_URL}/api/actuators/{actuator_name}", 
+            json=payload, 
+            timeout=2.0
+        )
+        return response.json()
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
