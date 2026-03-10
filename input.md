@@ -1,6 +1,6 @@
 # SYSTEM DESCRIPTION:
 
-Very far from home, SpaceY had the brillant idea to "accidentally" ship one of its employees to Mars in order to do some maintenance to the automation platform in charge of monitoring and controlling the environment.
+Very far from home, SpaceY had the brilliant idea to "accidentally" ship one of its employees to Mars in order to do some maintenance to the automation platform in charge of monitoring and controlling the environment.
 The unfortunate operator, after doing its computer science wizardry, it's now able to use the platform to check environmental metrics and decide when and how actuate changes in the habitat.
 
 # USER STORIES:
@@ -24,3 +24,51 @@ The unfortunate operator, after doing its computer science wizardry, it's now ab
 17) As an Operator, I want to view a sensor's data as a chart that progressively updates while the page is open
 18) As an Operator, I want the dashboard to receive sensor data in real-time without reloading the page
 
+# STANDARD EVENT SCHEMA:
+
+To decouple the ingestion from the processing and automation engines, all the heterogeneous payloads from the different devices are normalized into a unified internal format before being published to the Kafka message broker.
+
+The standard event is represented as a JSON object containing:
+
+- **`event_id`** (String): A unique UUID generated upon event creation to trace the message across the system
+- **`timestamp`** (String): An `OffsetDateTime` string representing the moment the metric was gathered
+- **`sensor_name`** (String): The unique identifier of the sensor 
+- **`value`** (Number): The float number corresponding to the measurement 
+- **`unit`** (String): The unit of measurement
+- **`status`** (String): The status of the event for debugging purposes
+
+# PAYLOAD EXAMPLE:
+
+{
+  "event_id": "abc123def456ghi789",
+  "timestamp": "2026-03-09T10:15:30+00:00",
+  "sensor_name": "greenhouse_temperature",
+  "value": 29.5,
+  "unit": "°C",
+  "status": "VALID"
+}
+
+# RULE MODEL:
+
+The automation engine evaluates the environmental metrics by comparing them to a set of conditions, by following simple **'IF-THEN'** rules persisted in a database and structured as follows:
+
+IF **'sensor_name'** **'operator'** **'threshold_value'** THEN **'actuator_name'** **'target_state'**
+
+# RULE EXAMPLE:
+
+{
+  "rule_id": 1,
+  "sensor_name": "greenhouse_temperature",
+  "operator": ">",
+  "threshold_value": 28.0,
+  "actuator_name": "cooling_fan",
+  "target_state": "ON"
+}
+
+# RULE EVALUATION:
+
+When a new event is consumed from the Kafka topic **'mars-telemetry-events'**, the message consumer extracts both the sensor name and the value, then it sends a request to the DB.
+
+The DB queries its storage searching for any rule containing the sensor name and a positive evaluation wrt the condition and the value.
+
+If a match is found, a state update is pushed to the actuator associated to the rule.
