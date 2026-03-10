@@ -26,7 +26,8 @@ services:
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
     container_name: kafka
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
@@ -35,7 +36,14 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_4LW_COMMANDS_WHITELIST: ruok,srvr
+      KAFKA_OPTS: "-Dzookeeper.4lw.commands.whitelist=ruok,srvr"
     container_name: zookeeper
+    healthcheck:
+      test: [ "CMD-SHELL", "echo srvr | nc localhost 2181 >/dev/null 2>&1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   mars-ingestion-service:
     build: ./mars-ingestion-service

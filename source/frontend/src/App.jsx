@@ -37,6 +37,16 @@ function App() {
       } else if (message.type === 'update') {
         setSensors(prev => {
           const updatedSensors = { ...prev, [message.data.sensor_name]: message.data };
+          
+          // Handle actuator state changes from triggered_actions
+          if (message.data.triggered_actions && message.data.triggered_actions.length > 0) {
+            message.data.triggered_actions.forEach(action => {
+              setActuators(prevActuators => ({
+                ...prevActuators,
+                [action.actuator]: action.action
+              }));
+            });
+          }
           if (message.data.sensor_name === 'greenhouse_temperature') {
             setTempHistory(currentHistory => {
               const updatedHistory = [...currentHistory, { time: new Date().toLocaleTimeString(), temp: message.data.value }];
@@ -78,7 +88,12 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ state: newState })
       });
-      if (!response.ok) throw new Error("Errore nell'invio del comando");
+      if (!response.ok) {
+        console.error(`❌ Errore HTTP: ${response.status} - ${response.statusText}`);
+        setActuators(prev => ({ ...prev, [actuatorName]: currentState }));
+        alert(`Impossibile comunicare con l'attuatore: ${actuatorName}`);
+        return;
+      }
       console.log(`✅ Attuatore ${actuatorName} impostato a ${newState}`);
     } catch (error) {
       console.error(`❌ Errore attuatore ${actuatorName}:`, error);

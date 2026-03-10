@@ -36,6 +36,34 @@ def process_event(payload):
         print(f"\n[+] Nuovo Evento: {sensor_name} = {value} {unit} [{timestamp}]")
         if triggered_actions:
             print(f"    -> Azioni: {triggered_actions}")
+            
+            # Execute triggered actions via API Gateway
+            print(f"    -> 🔄 Inizio esecuzione azioni...")
+            for action in triggered_actions:
+                try:
+                    actuator_name = action['actuator']
+                    actuator_state = action['action']
+                    print(f"    -> 📤 Tentativo: {actuator_name} = {actuator_state} verso {API_GATEWAY_URL}")
+                    
+                    response = requests.post(
+                        f"{API_GATEWAY_URL}/api/actuators/{actuator_name}",
+                        json={"state": actuator_state},
+                        timeout=2.0
+                    )
+                    
+                    print(f"    -> 📡 Response status: {response.status_code}")
+                    if response.status_code == 200:
+                        print(f"    -> ✅ Eseguito: {actuator_name} = {actuator_state}")
+                        print(f"    -> 📄 Response: {response.text}")
+                    else:
+                        print(f"    -> ❌ Errore eseguendo {actuator_name}: {response.status_code}")
+                        print(f"    -> 📄 Error response: {response.text}")
+                        
+                except Exception as e:
+                    print(f"    -> ❌ Errore esecuzione azione {action}: {e}")
+                    print(f"    -> 🔍 Exception type: {type(e).__name__}")
+            
+            print(f"    -> ✅ Fine esecuzione azioni")
 
         try:
             requests.post(
